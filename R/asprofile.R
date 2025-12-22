@@ -10,10 +10,6 @@
 #'   if present.
 #' @param speed_threshold Numeric. Minimum speed (m/s) to include.
 #'   Default is 0.
-#' @param bin_width Numeric. Width of speed bins (m/s).
-#'   Default is 0.1.
-#' @param envelope_n Integer. Number of highest-acceleration points
-#'   retained per speed bin. Default is 2.
 #' @param keep_frac Numeric in (0,1]. Fraction of raw points shown
 #'   in plots. Default is 0.5.
 #' @param seed Optional integer. If provided, sampling is reproducible.
@@ -39,8 +35,6 @@
 #' @export
 as_prepare_data <- function(x,
                             speed_threshold = 0,
-                            bin_width = 0.1,
-                            envelope_n = 2,
                             keep_frac = 0.5,
                             seed = NULL,
                             print_plot = TRUE) {
@@ -77,7 +71,7 @@ as_prepare_data <- function(x,
     return(NULL)
   }
 
-  breaks <- seq(from = speed_threshold, to = max_speed, by = bin_width)
+  breaks <- seq(from = speed_threshold, to = max_speed, by = 0.1)
   if (length(breaks) < 2) {
     warning("Not enough breaks to bin data. Increase date range or lower speed_threshold.")
     return(NULL)
@@ -91,7 +85,7 @@ as_prepare_data <- function(x,
   # ---- envelope: top N acc per bin
   as_initial_lm_data <- prepared_data %>%
     dplyr::group_by(cuts) %>%
-    dplyr::slice_max(acc, n = envelope_n, with_ties = FALSE) %>%
+    dplyr::slice_max(acc, n = 2, with_ties = FALSE) %>%
     dplyr::ungroup()
 
   # ---- optional raw plot
