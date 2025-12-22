@@ -130,7 +130,7 @@ as_prepare_data <- function(x,
 #'
 #' @return A list with cleaned data, models, metrics, and plot (if requested).
 #' @export
-as_profile <- function(prep,
+as_get_profile <- function(prep,
                        method = c("ci", "box"),
                        ci_level = 0.95,
                        ci_interval = c("confidence", "prediction"),
@@ -283,3 +283,4 @@ as_profile <- function(prep,
     plot_profile = plot_profile
   )
 }
+
