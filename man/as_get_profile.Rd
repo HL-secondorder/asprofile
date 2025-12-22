@@ -2,7 +2,7 @@
 % Please edit documentation in R/asprofile.R
 \name{as_get_profile}
 \alias{as_get_profile}
-\title{Build A–S profile from prepared data}
+\title{Fit and visualize an acceleration–speed (A–S) profile}
 \usage{
 as_get_profile(
   prep,
@@ -15,24 +15,48 @@ as_get_profile(
 )
 }
 \arguments{
-\item{prep}{Output of \code{as_prepare_data()}.}
+\item{prep}{Output from \code{as_prepare_data()}.}
 
-\item{method}{Cleaning method: "ci" (default) or "box".}
+\item{method}{Character. Cleaning method:
+\code{"ci"} (confidence interval) or \code{"box"} (quantile + IQR).}
 
-\item{ci_level}{Confidence level for CI filtering. Default 0.95.}
+\item{ci_level}{Numeric. Confidence level for CI filtering.
+Default is 0.95.}
 
-\item{ci_interval}{Interval type passed to \code{predict()}: "confidence" or "prediction".
-Default "confidence".}
+\item{ci_interval}{Character. Passed to \code{stats::predict()}:
+\code{"confidence"} or \code{"prediction"}.}
 
-\item{seed}{Optional integer seed for reproducible downsampling.}
+\item{seed}{Optional integer for reproducible sampling.}
 
-\item{keep_frac}{Fraction of raw points to keep for plotting. Default 0.5.}
+\item{keep_frac}{Numeric in (0,1]. Fraction of raw points plotted.
+Default is 0.5.}
 
-\item{print_plot}{Logical; return a profile plot. Default TRUE.}
+\item{print_plot}{Logical. If TRUE, returns the A–S profile plot.}
 }
 \value{
-A list with cleaned data, models, metrics, and plot (if requested).
+A list with:
+\itemize{
+\item \code{as_clean}: cleaned envelope points
+\item \code{lm_initial}: initial linear model
+\item \code{lm_clean}: final linear model
+\item \code{metrics}: list with A0, S0, slope, R^2
+\item \code{plot_profile}: ggplot object (or NULL)
+}
 }
 \description{
-Build A–S profile from prepared data
+This function cleans envelope points using either a confidence-interval
+or box/IQR method, fits a linear A–S model, and computes key mechanical
+metrics (A0, S0, slope, R^2).
+}
+\examples{
+df <- tibble::tibble(
+  speed = runif(500, 0, 8),
+  acc   = rnorm(500, 2, 0.6)
+)
+
+prep <- as_prepare_data(df, speed_threshold = 3, print_plot = FALSE)
+prof <- as_get_profile(prep, method = "ci", print_plot = TRUE)
+
+prof$metrics
+
 }

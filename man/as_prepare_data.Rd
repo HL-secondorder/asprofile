@@ -15,25 +15,48 @@ as_prepare_data(
 )
 }
 \arguments{
-\item{x}{A data frame/tibble containing at least columns \code{speed} and \code{acc}.
-Optional columns: \code{activity_id}, \code{athlete_id}.}
+\item{x}{A data frame or tibble containing at least columns
+\code{speed} (m/s) and \code{acc} (m/s^2).
+Optional columns \code{activity_id} and \code{athlete_id} are preserved
+if present.}
 
-\item{speed_threshold}{Minimum speed to keep (m/s). Default 0.}
+\item{speed_threshold}{Numeric. Minimum speed (m/s) to include.
+Default is 0.}
 
-\item{bin_width}{Speed bin width (m/s). Default 0.1.}
+\item{bin_width}{Numeric. Width of speed bins (m/s).
+Default is 0.1.}
 
-\item{envelope_n}{Number of top acceleration points per bin. Default 2.}
+\item{envelope_n}{Integer. Number of highest-acceleration points
+retained per speed bin. Default is 2.}
 
-\item{keep_frac}{Fraction of raw points to keep for plotting. Default 0.5.}
+\item{keep_frac}{Numeric in (0,1]. Fraction of raw points shown
+in plots. Default is 0.5.}
 
-\item{seed}{Optional integer seed for reproducible downsampling.}
+\item{seed}{Optional integer. If provided, sampling is reproducible.}
 
-\item{print_plot}{Logical; return a raw plot. Default TRUE.}
+\item{print_plot}{Logical. If TRUE, returns a raw A–S scatter plot
+with envelope points highlighted.}
 }
 \value{
-An object of class \code{as_prep} (a list with as_data, prepared_data,
-as_initial_lm_data, plot_initial).
+An object of class \code{"as_prep"} containing:
+\itemize{
+\item \code{as_data}: filtered raw data
+\item \code{prepared_data}: binned data
+\item \code{as_initial_lm_data}: envelope points
+\item \code{plot_initial}: ggplot object (or NULL)
+}
 }
 \description{
-Prepare acceleration–speed data for A–S profiling
+This function filters raw acceleration–speed observations, bins speed,
+and extracts envelope points (top acceleration per speed bin) for
+subsequent A–S model fitting.
+}
+\examples{
+df <- tibble::tibble(
+  speed = runif(500, 0, 8),
+  acc   = rnorm(500, 2, 0.6)
+)
+
+prep <- as_prepare_data(df, speed_threshold = 3, print_plot = TRUE)
+
 }

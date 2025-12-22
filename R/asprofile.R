@@ -1,16 +1,41 @@
 #' Prepare acceleration–speed data for A–S profiling
 #'
-#' @param x A data frame/tibble containing at least columns `speed` and `acc`.
-#'          Optional columns: `activity_id`, `athlete_id`.
-#' @param speed_threshold Minimum speed to keep (m/s). Default 0.
-#' @param bin_width Speed bin width (m/s). Default 0.1.
-#' @param envelope_n Number of top acceleration points per bin. Default 2.
-#' @param keep_frac Fraction of raw points to keep for plotting. Default 0.5.
-#' @param seed Optional integer seed for reproducible downsampling.
-#' @param print_plot Logical; return a raw plot. Default TRUE.
+#' This function filters raw acceleration–speed observations, bins speed,
+#' and extracts envelope points (top acceleration per speed bin) for
+#' subsequent A–S model fitting.
 #'
-#' @return An object of class `as_prep` (a list with as_data, prepared_data,
-#'         as_initial_lm_data, plot_initial).
+#' @param x A data frame or tibble containing at least columns
+#'   \code{speed} (m/s) and \code{acc} (m/s^2).
+#'   Optional columns \code{activity_id} and \code{athlete_id} are preserved
+#'   if present.
+#' @param speed_threshold Numeric. Minimum speed (m/s) to include.
+#'   Default is 0.
+#' @param bin_width Numeric. Width of speed bins (m/s).
+#'   Default is 0.1.
+#' @param envelope_n Integer. Number of highest-acceleration points
+#'   retained per speed bin. Default is 2.
+#' @param keep_frac Numeric in (0,1]. Fraction of raw points shown
+#'   in plots. Default is 0.5.
+#' @param seed Optional integer. If provided, sampling is reproducible.
+#' @param print_plot Logical. If TRUE, returns a raw A–S scatter plot
+#'   with envelope points highlighted.
+#'
+#' @return An object of class \code{"as_prep"} containing:
+#' \itemize{
+#'   \item \code{as_data}: filtered raw data
+#'   \item \code{prepared_data}: binned data
+#'   \item \code{as_initial_lm_data}: envelope points
+#'   \item \code{plot_initial}: ggplot object (or NULL)
+#' }
+#'
+#' @examples
+#' df <- tibble::tibble(
+#'   speed = runif(500, 0, 8),
+#'   acc   = rnorm(500, 2, 0.6)
+#' )
+#'
+#' prep <- as_prepare_data(df, speed_threshold = 3, print_plot = TRUE)
+#'
 #' @export
 as_prepare_data <- function(x,
                             speed_threshold = 0,
@@ -117,18 +142,44 @@ as_prepare_data <- function(x,
 }
 
 
-#' Build A–S profile from prepared data
+#' Fit and visualize an acceleration–speed (A–S) profile
 #'
-#' @param prep Output of `as_prepare_data()`.
-#' @param method Cleaning method: "ci" (default) or "box".
-#' @param ci_level Confidence level for CI filtering. Default 0.95.
-#' @param ci_interval Interval type passed to `predict()`: "confidence" or "prediction".
-#'        Default "confidence".
-#' @param seed Optional integer seed for reproducible downsampling.
-#' @param keep_frac Fraction of raw points to keep for plotting. Default 0.5.
-#' @param print_plot Logical; return a profile plot. Default TRUE.
+#' This function cleans envelope points using either a confidence-interval
+#' or box/IQR method, fits a linear A–S model, and computes key mechanical
+#' metrics (A0, S0, slope, R^2).
 #'
-#' @return A list with cleaned data, models, metrics, and plot (if requested).
+#' @param prep Output from \code{as_prepare_data()}.
+#' @param method Character. Cleaning method:
+#'   \code{"ci"} (confidence interval) or \code{"box"} (quantile + IQR).
+#' @param ci_level Numeric. Confidence level for CI filtering.
+#'   Default is 0.95.
+#' @param ci_interval Character. Passed to \code{stats::predict()}:
+#'   \code{"confidence"} or \code{"prediction"}.
+#' @param seed Optional integer for reproducible sampling.
+#' @param keep_frac Numeric in (0,1]. Fraction of raw points plotted.
+#'   Default is 0.5.
+#' @param print_plot Logical. If TRUE, returns the A–S profile plot.
+#'
+#' @return A list with:
+#' \itemize{
+#'   \item \code{as_clean}: cleaned envelope points
+#'   \item \code{lm_initial}: initial linear model
+#'   \item \code{lm_clean}: final linear model
+#'   \item \code{metrics}: list with A0, S0, slope, R^2
+#'   \item \code{plot_profile}: ggplot object (or NULL)
+#' }
+#'
+#' @examples
+#' df <- tibble::tibble(
+#'   speed = runif(500, 0, 8),
+#'   acc   = rnorm(500, 2, 0.6)
+#' )
+#'
+#' prep <- as_prepare_data(df, speed_threshold = 3, print_plot = FALSE)
+#' prof <- as_get_profile(prep, method = "ci", print_plot = TRUE)
+#'
+#' prof$metrics
+#'
 #' @export
 as_get_profile <- function(prep,
                        method = c("ci", "box"),
