@@ -1,11 +1,31 @@
 Package: asprofile
-Title: What the Package Does (One Line, Title Case)
-Version: 0.0.0.9000
+Title: Acceleration–Speed Profiling for Athlete Monitoring
+Version: 0.1.0
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person(
+      "Hanwen", "Liu",
+      email = "liuhanwen102398@gmail.com",
+      role = c("aut", "cre")
+    )
+Description: 
+    Tools for preparing, modeling, and visualizing in-situ acceleration–speed (A–S)
+    profiles from athlete tracking data. The package implements envelope-based
+    data reduction, confidence-interval and box-filter cleaning methods, and
+    linear A–S model fitting to estimate key performance metrics such as maximal
+    acceleration (A0), maximal sprinting speed (S0), slope, and goodness of fit.
+    Designed for applied sport science research and athlete monitoring workflows.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
+Imports:
+    dplyr,
+    ggplot2,
+    tibble,
+    ggpubr,
+    stats
+URL: https://github.com/HL-secondorder/asprofile
+BugReports: https://github.com/HL-secondorder/asprofile/issues
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

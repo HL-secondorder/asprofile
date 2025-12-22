@@ -1,0 +1,106 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# asprofile
+
+asprofile provides tools to prepare, clean, and model in-situ acceleration–speed (A–S) profiles from athlete tracking data.
+It implements envelope-based data reduction (top acceleration points per speed bin), optional CI/box filtering, and linear A–S model fitting to estimate key metrics such as A0, S0, slope, and R².
+
+## Installation
+
+You can install the development version from GitHub:
+
+### install.packages("devtools")
+devtools::install_github("hanwen-liu/asprofile")
+
+## Example
+
+### Minimal workflow
+The typical workflow is:
+
+1. Prepare raw A–S data (filtering + binning + envelope extraction)
+
+2. Fit an A–S profile (CI or box filtering + linear model + metrics)
+
+```{r example}
+library(tidyverse)  
+library(asprofile)
+library(ggpubr)
+
+# Example data (replace with your own tracking data)
+
+set.seed(1)
+
+df <- tibble::tibble(
+  speed = runif(800, 0, 8)
+) %>%
+  dplyr::mutate(
+    acc_mean = 4 * exp(-0.45 * speed),           
+    acc      = acc_mean + rnorm(800, 0, 0.35)    
+  ) %>%
+  dplyr::select(speed, acc)
+
+# 1) Prepare
+
+prep <- as_prepare_data(
+df,
+speed_threshold = 2,
+print_plot = TRUE
+)
+
+# 2) Fit profile (CI-based cleaning)
+
+res_ci <- as_get_profile(
+prep,
+method = "ci",
+print_plot = TRUE
+)
+
+res_ci$metrics
+res_ci$plot_profile
+```
+
+### Cleaning methods
+
+1. CI method (method = "ci")
+Fits an initial linear model to envelope points and removes points outside the chosen interval.
+
+2. Box method (method = "box")
+Uses a high-quantile pre-filter plus an IQR rule per speed bin, then keeps a representative maximum per bin.
+
+```{r example}
+res_box <- as_get_profile(prep, method = "box", print_plot = TRUE)
+
+res_box$metrics
+res_box$plot_profile
+```
+
+## Notes
+
+Units are assumed to be:
+
+1. speed: m/s
+
+2. acc: m/s²
+
+For reproducible plotting downsampling, set seed in as_prepare_data() / as_profile().
+
+## Citation
+
+If you use this package in academic work, please cite the GitHub repository for now. A formal citation will be added after the methods paper is released.
+
+## License
+
+MIT License (see LICENSE).
