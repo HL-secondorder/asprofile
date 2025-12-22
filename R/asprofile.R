@@ -90,7 +90,7 @@ as_prepare_data <- function(x,
 
   # ---- envelope: top N acc per bin
   as_initial_lm_data <- prepared_data %>%
-    dplyr::group_by(.data$cuts) %>%
+    dplyr::group_by(cuts) %>%
     dplyr::slice_max(acc, n = envelope_n, with_ties = FALSE) %>%
     dplyr::ungroup()
 
@@ -229,7 +229,7 @@ as_get_profile <- function(prep,
   } else {
     # box / quantile + IQR method, 1 row per bin
     as_clean <- prepared_data %>%
-      dplyr::group_by(.data$cuts) %>%
+      dplyr::group_by(cuts) %>%
       dplyr::filter(
         acc >= stats::quantile(acc, 0.98, na.rm = TRUE) |
           speed >= stats::quantile(speed, 0.98, na.rm = TRUE)
@@ -237,11 +237,11 @@ as_get_profile <- function(prep,
       dplyr::mutate(
         q1 = stats::quantile(acc, 0.25, na.rm = TRUE),
         q3 = stats::quantile(acc, 0.75, na.rm = TRUE),
-        iqr = .data$q3 - .data$q1,
-        lower_bound = .data$q1 - 1.5 * .data$iqr,
-        upper_bound = .data$q3 + 1.5 * .data$iqr
+        iqr = q3 - q1,
+        lower_bound = q1 - 1.5 * iqr,
+        upper_bound = q3 + 1.5 * iqr
       ) %>%
-      dplyr::filter(acc >= .data$lower_bound, acc <= .data$upper_bound) %>%
+      dplyr::filter(acc >= lower_bound, acc <= upper_bound) %>%
       dplyr::summarise(
         acc = max(acc, na.rm = TRUE),
         speed = max(speed, na.rm = TRUE),
