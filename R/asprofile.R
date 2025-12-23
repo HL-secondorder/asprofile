@@ -10,8 +10,6 @@
 #'   if present.
 #' @param speed_threshold Numeric. Minimum speed (m/s) to include.
 #'   Default is 0.
-#' @param keep_frac Numeric in (0,1]. Fraction of raw points shown
-#'   in plots. Default is 0.5.
 #' @param seed Optional integer. If provided, sampling is reproducible.
 #' @param print_plot Logical. If TRUE, returns a raw A–S scatter plot
 #'   with envelope points highlighted.
@@ -35,7 +33,6 @@
 #' @export
 as_prepare_data <- function(x,
                             speed_threshold = 0,
-                            keep_frac = 0.5,
                             seed = NULL,
                             print_plot = TRUE) {
 
@@ -93,7 +90,7 @@ as_prepare_data <- function(x,
   if (isTRUE(print_plot)) {
     if (!is.null(seed)) set.seed(seed)
 
-    keep_frac <- max(0, min(1, keep_frac))
+    keep_frac <- max(0, min(1, 0.5))
     keep_n <- max(1L, ceiling(nrow(as_data) * keep_frac))
     idx <- sample.int(nrow(as_data), size = keep_n)
 
@@ -145,13 +142,7 @@ as_prepare_data <- function(x,
 #' @param prep Output from \code{as_prepare_data()}.
 #' @param method Character. Cleaning method:
 #'   \code{"ci"} (confidence interval) or \code{"box"} (quantile + IQR).
-#' @param ci_level Numeric. Confidence level for CI filtering.
-#'   Default is 0.95.
-#' @param ci_interval Character. Passed to \code{stats::predict()}:
-#'   \code{"confidence"} or \code{"prediction"}.
 #' @param seed Optional integer for reproducible sampling.
-#' @param keep_frac Numeric in (0,1]. Fraction of raw points plotted.
-#'   Default is 0.5.
 #' @param print_plot Logical. If TRUE, returns the A–S profile plot.
 #'
 #' @return A list with:
@@ -176,19 +167,15 @@ as_prepare_data <- function(x,
 #'
 #' @export
 as_get_profile <- function(prep,
-                       method = c("ci", "box"),
-                       ci_level = 0.95,
-                       ci_interval = c("confidence", "prediction"),
-                       seed = NULL,
-                       keep_frac = 0.5,
-                       print_plot = TRUE) {
+                           method = c("ci", "box"),
+                           seed = NULL,
+                           print_plot = TRUE) {
 
   if (is.null(prep) || !inherits(prep, "as_prep")) {
     stop("`prep` must be the output of `as_prepare_data()`.")
   }
 
   method <- match.arg(method)
-  ci_interval <- match.arg(ci_interval)
 
   as_data <- prep$as_data
   prepared_data <- prep$prepared_data
@@ -209,8 +196,8 @@ as_get_profile <- function(prep,
       stats::predict(
         lm_initial,
         newdata = as_initial_lm_data,
-        interval = ci_interval,
-        level = ci_level
+        interval = "confidence",
+        level = 0.95
       )
     )
 
@@ -271,7 +258,7 @@ as_get_profile <- function(prep,
   if (isTRUE(print_plot)) {
     if (!is.null(seed)) set.seed(seed)
 
-    keep_frac <- max(0, min(1, keep_frac))
+    keep_frac <- max(0, min(1, 0.5))
     keep_n <- max(1L, ceiling(nrow(as_data) * keep_frac))
     idx <- sample.int(nrow(as_data), size = keep_n)
 
