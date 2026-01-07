@@ -23,7 +23,7 @@ It implements envelope-based data reduction (top acceleration points per speed b
 You can install the development version from GitHub:
 
 ### install.packages("devtools")
-devtools::install_github("hanwen-liu/asprofile")
+devtools::install_github("HL-secondorder/asprofile")
 
 ## Example
 
