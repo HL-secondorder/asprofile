@@ -54,7 +54,11 @@ as_prepare_data <- function(x,
     dplyr::filter(acc >= 0)
 
   prepared_data <- as_data %>%
-    dplyr::filter(speed > speed_threshold)
+    dplyr::filter(
+      speed > speed_threshold,
+      speed < 11,
+      acc < 6
+    )
 
   if (nrow(prepared_data) == 0) {
     warning("No data left after filtering. Check thresholds.")
